@@ -1,6 +1,7 @@
 import React from "react";
 import * as d3 from "d3";
 import * as topojson from "topojson";
+import TopoFeature from "./topoFeature";
 
 const countryBoundaryStyle = {
     "fill": "none",
@@ -36,20 +37,6 @@ const getProjection = (features, width, height) => {
 }
 
 class TopoMap extends React.Component {
-    constructor(props) {
-        super(props);
-        this._handleOnMouseOver = this._handleOnMouseOver.bind(this);
-        this._handleOnMouseOut = this._handleOnMouseOut.bind(this);
-        this.state = { mouseOverIndex: -1 };
-    }
-    
-    _handleOnMouseOver = (i) => {
-        this.setState({ mouseOverIndex: i });
-    };
-
-    _handleOnMouseOut = () => {
-        this.setState({ mouseOverIndex: -1 });
-    };
 
     render() {
         const width = this.props.width;
@@ -57,6 +44,7 @@ class TopoMap extends React.Component {
         const topology = this.props.topology;
         const topoMap = this.props.map;
         const names = this.props.names;
+        const votes = this.props.votes;
         const x = this.props.x;
         const y = this.props.y;
 
@@ -71,14 +59,7 @@ class TopoMap extends React.Component {
                 {
                     country.features.map((f,i) => { 
                         return ( 
-                            <TopoFeature key={i} index={i} projection={projection} feature={f} name={names[i]} onMouseOver={this._handleOnMouseOver} onMouseOut={this._handleOnMouseOut}/> 
-                        )
-                    })
-                }
-                {
-                    country.features.map((f,i) => { 
-                        return ( 
-                            <text key={i} transform={"translate(" + projection.centroid(f) + ")"} style={provinceLabelStyle} visibility={this.state.mouseOverIndex == i ? "visible" : "hidden"}>{names[i]}</text>
+                            <TopoFeature key={i} index={i} projection={projection} feature={f} name={names[i]} votes={votes[i]} isSelected={false} />
                         )
                     })
                 }
@@ -88,52 +69,5 @@ class TopoMap extends React.Component {
         );
     }
 };
-
-const provinceStyle = {
-    "fill": "#ddc",
-    "cursor": "pointer"
-}
-
-const provinceHoverStyle = {
-    "fill": "orange",
-    "cursor": "pointer"
-}
-
-const provinceLabelStyle = {
-    "fill": "black",
-    "fillOpacity": ".5",
-    "fontSize": "20px",
-    "fontWeight": "300",
-    "textAnchor": "middle",
-    "cursor": "pointer",
-}
-
-class TopoFeature extends React.Component {
-    constructor(props) {
-        super(props);
-        this._handleOnMouseOver = this._handleOnMouseOver.bind(this);
-        this._handleOnMouseOut = this._handleOnMouseOut.bind(this);
-        this.state = { isMouseOver: false };
-    }
-
-    _handleOnMouseOver = () => {
-        this.setState({ isMouseOver: true });
-        this.props.onMouseOver(this.props.index);
-    };
-
-    _handleOnMouseOut = () => {
-        this.setState({ isMouseOver: false });
-        this.props.onMouseOut(this.props.index);
-    };
-
-    render() {
-        const projection = this.props.projection;
-        const feature = this.props.feature;
-        const isMouseOver = this.state.isMouseOver;
-        return (
-            <path d={projection(feature)} style={isMouseOver ? provinceHoverStyle : provinceStyle} onMouseOver={this._handleOnMouseOver} onMouseOut={this._handleOnMouseOut} />
-        );
-    }
-}
 
 export default TopoMap;
